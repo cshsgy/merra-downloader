@@ -2,7 +2,6 @@ import argparse
 from config import Config
 from downloader import MERRADownloader
 from processor import MERRAProcessor
-from products import MERRAProductCatalog
 
 def main():
     parser = argparse.ArgumentParser(description="MERRA Data Downloader and Processor")
