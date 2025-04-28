@@ -3,7 +3,6 @@ from typing import List, Dict, Any
 import datetime
 import os
 from config import Config
-from products import MERRAProductCatalog
 
 class MERRADownloader:
     def __init__(self, config: Config):
@@ -14,7 +13,6 @@ class MERRADownloader:
 
     def _generate_file_urls(self, product_id: str, start_date: str, end_date: str) -> List[str]:
         """Generate list of file URLs for the given date range."""
-        product = MERRAProductCatalog.get_product(product_id)
         start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
         end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
         
@@ -26,14 +24,17 @@ class MERRADownloader:
             day = current.day
             
             # Format URL based on product type
-            if product.frequency == "3-hour":
+            if "M2I3N" in product_id:  # 3-hourly products
                 for hour in range(0, 24, 3):
-                    url = f"{product.base_url}{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}{day:02d}.{hour:02d}00.nc4"
+                    url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}{day:02d}.{hour:02d}00.nc4"
                     urls.append(url)
-            elif product.frequency == "1-hour":
+            elif "M2T1N" in product_id:  # 1-hourly products
                 for hour in range(24):
-                    url = f"{product.base_url}{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}{day:02d}.{hour:02d}00.nc4"
+                    url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}{day:02d}.{hour:02d}00.nc4"
                     urls.append(url)
+            elif "M2TMN" in product_id:  # Monthly products
+                url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}.nc4"
+                urls.append(url)
             
             current += datetime.timedelta(days=1)
         

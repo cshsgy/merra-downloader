@@ -30,12 +30,30 @@ class Config:
         
         self.config_file = config_file
         self.config = self._load_config()
+        self.base_url = "https://goldsmr5.gesdisc.eosdis.nasa.gov/opendap/MERRA2/"
 
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from JSON file."""
         try:
             with open(self.config_file, 'r') as f:
-                return json.load(f)
+                config = json.load(f)
+                
+                # Validate required fields
+                required_fields = ["time_range", "box", "variables", "product"]
+                for field in required_fields:
+                    if field not in config:
+                        raise ValueError(f"Missing required field in config: {field}")
+                
+                # Validate time range format
+                if not all(key in config["time_range"] for key in ["start", "end"]):
+                    raise ValueError("time_range must contain 'start' and 'end' dates")
+                
+                # Validate box coordinates
+                if not all(key in config["box"] for key in ["north", "south", "east", "west"]):
+                    raise ValueError("box must contain 'north', 'south', 'east', and 'west' coordinates")
+                
+                return config
+                
         except FileNotFoundError:
             print(f"Config file {self.config_file} not found. Using default configuration.")
             return {
@@ -50,7 +68,7 @@ class Config:
                     "west": -180
                 },
                 "variables": ["O3", "CO", "NO2"],
-                "product": "M2I3NPASM"
+                "product": "M2I3NPASM.5.12.4"
             }
 
     def save_config(self, config: Dict[str, Any]):

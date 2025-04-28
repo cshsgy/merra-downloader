@@ -9,6 +9,7 @@ A Python tool for downloading and processing MERRA (Modern-Era Retrospective ana
 - Select specific variables of interest
 - Support for multiple MERRA products with different temporal resolutions
 - Automatic processing and saving of data in NetCDF format
+- For a complete list of datasets available: https://goldsmr5.gesdisc.eosdis.nasa.gov/opendap/MERRA2/
 
 ## Installation
 
