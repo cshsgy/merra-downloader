@@ -85,8 +85,8 @@ class MERRADownloader:
         # Create variable subset string
         var_subset = ",".join([f"{var}{lat_range}{lon_range}" for var in variables])
         
-        # Construct OpenDAP subset URL
-        return f"{base_url}?{var_subset}"
+        # Construct OpenDAP subset URL with .dods extension
+        return f"{base_url}.dods?{var_subset}"
 
     def download_data(self, output_dir: str = "data") -> List[str]:
         """Download MERRA data based on configuration."""
