@@ -1,0 +1,9 @@
+__pycache__
+
+*.nc
+*.nc4
+*.hdf
+*.hdf4
+*.hdf5
+*.hdf5.Z
+*.hdf5.gz

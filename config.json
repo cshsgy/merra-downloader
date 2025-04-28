@@ -1,0 +1,20 @@
+{
+    "time_range": {
+        "start": "2023-01-01",
+        "end": "2023-01-07"
+    },
+    "box": {
+        "north": 40.0,
+        "south": 30.0,
+        "east": -70.0,
+        "west": -80.0
+    },
+    "variables": [
+        "O3",
+        "CO",
+        "NO2",
+        "T",
+        "PS"
+    ],
+    "product": "M2I3NPASM"
+} 
