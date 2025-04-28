@@ -14,6 +14,7 @@ class MERRADownloader:
     def _get_product_info(self, product_id: str) -> tuple:
         """Get product information based on product ID."""
         # Map product IDs to their corresponding file name patterns
+        product_id_main = product_id.split(".")[0]
         product_map = {
             "M2I3NPASM": ("inst3_3d_asm_Np", "3-hour"),
             "M2I3NVAER": ("inst3_3d_aer_Nv", "3-hour"),
@@ -25,10 +26,10 @@ class MERRADownloader:
             "M2TMNXRAD": ("tavgM_2d_rad_Nx", "monthly")
         }
         
-        if product_id not in product_map:
-            raise ValueError(f"Unsupported product ID: {product_id}")
+        if product_id_main not in product_map:
+            raise ValueError(f"Unsupported product ID: {product_id_main}")
         
-        return product_map[product_id]
+        return product_map[product_id_main]
 
     def _generate_file_urls(self, product_id: str, start_date: str, end_date: str) -> List[str]:
         """Generate list of file URLs for the given date range."""
@@ -65,7 +66,7 @@ class MERRADownloader:
     def download_data(self, output_dir: str = "data") -> List[str]:
         """Download MERRA data based on configuration."""
         config = self.config.config
-        product_id = config["product"].split(".")[0]  # Remove version number
+        product_id = config["product"]
         start_date = config["time_range"]["start"]
         end_date = config["time_range"]["end"]
         
