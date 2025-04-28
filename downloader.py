@@ -11,8 +11,28 @@ class MERRADownloader:
         self.session = requests.Session()
         self.session.auth = (self.username, self.password)
 
+    def _get_product_info(self, product_id: str) -> tuple:
+        """Get product information based on product ID."""
+        # Map product IDs to their corresponding file name patterns
+        product_map = {
+            "M2I3NPASM": ("inst3_3d_asm_Np", "3-hour"),
+            "M2I3NVAER": ("inst3_3d_aer_Nv", "3-hour"),
+            "M2T1NXFLX": ("tavg1_2d_flx_Nx", "1-hour"),
+            "M2T1NXAER": ("tavg1_2d_aer_Nx", "1-hour"),
+            "M2T1NXRAD": ("tavg1_2d_rad_Nx", "1-hour"),
+            "M2TMNXAER": ("tavgM_2d_aer_Nx", "monthly"),
+            "M2TMNXFLX": ("tavgM_2d_flx_Nx", "monthly"),
+            "M2TMNXRAD": ("tavgM_2d_rad_Nx", "monthly")
+        }
+        
+        if product_id not in product_map:
+            raise ValueError(f"Unsupported product ID: {product_id}")
+        
+        return product_map[product_id]
+
     def _generate_file_urls(self, product_id: str, start_date: str, end_date: str) -> List[str]:
         """Generate list of file URLs for the given date range."""
+        file_pattern, frequency = self._get_product_info(product_id)
         start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
         end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
         
@@ -23,17 +43,19 @@ class MERRADownloader:
             month = current.month
             day = current.day
             
-            # Format URL based on product type
-            if "M2I3N" in product_id:  # 3-hourly products
+            if frequency == "3-hour":
                 for hour in range(0, 24, 3):
-                    url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}{day:02d}.{hour:02d}00.nc4"
+                    filename = f"MERRA2_400.{file_pattern}.{year}{month:02d}{day:02d}.nc4"
+                    url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/{filename}"
                     urls.append(url)
-            elif "M2T1N" in product_id:  # 1-hourly products
+            elif frequency == "1-hour":
                 for hour in range(24):
-                    url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}{day:02d}.{hour:02d}00.nc4"
+                    filename = f"MERRA2_400.{file_pattern}.{year}{month:02d}{day:02d}.nc4"
+                    url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/{filename}"
                     urls.append(url)
-            elif "M2TMN" in product_id:  # Monthly products
-                url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/MERRA2_400.{product_id}.{year}{month:02d}.nc4"
+            elif frequency == "monthly":
+                filename = f"MERRA2_400.{file_pattern}.{year}{month:02d}.nc4"
+                url = f"{self.config.base_url}{product_id}/{year}/{month:02d}/{filename}"
                 urls.append(url)
             
             current += datetime.timedelta(days=1)
@@ -43,7 +65,7 @@ class MERRADownloader:
     def download_data(self, output_dir: str = "data") -> List[str]:
         """Download MERRA data based on configuration."""
         config = self.config.config
-        product_id = config["product"]
+        product_id = config["product"].split(".")[0]  # Remove version number
         start_date = config["time_range"]["start"]
         end_date = config["time_range"]["end"]
         
