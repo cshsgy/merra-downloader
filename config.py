@@ -2,12 +2,32 @@ import os
 from dotenv import load_dotenv
 from typing import Dict, Any
 import json
+from pathlib import Path
 
 class Config:
     def __init__(self, config_file: str = "config.json"):
-        load_dotenv()
+        # Load .env file from the same directory as config.py
+        env_path = Path(__file__).parent / ".env"
+        if not env_path.exists():
+            raise FileNotFoundError(
+                f"Credentials file not found at {env_path}. "
+                "Please create a .env file with MERRA_USERNAME and MERRA_PASSWORD."
+            )
+        
+        # Load environment variables from .env file
+        load_dotenv(env_path)
+        
+        # Get credentials
         self.username = os.getenv("MERRA_USERNAME")
         self.password = os.getenv("MERRA_PASSWORD")
+        
+        # Validate credentials
+        if not self.username or not self.password:
+            raise ValueError(
+                "MERRA credentials not found in .env file. "
+                "Please ensure MERRA_USERNAME and MERRA_PASSWORD are set."
+            )
+        
         self.config_file = config_file
         self.config = self._load_config()
 
@@ -17,6 +37,7 @@ class Config:
             with open(self.config_file, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
+            print(f"Config file {self.config_file} not found. Using default configuration.")
             return {
                 "time_range": {
                     "start": "2020-01-01",
@@ -40,6 +61,4 @@ class Config:
 
     def get_credentials(self) -> tuple:
         """Get MERRA credentials."""
-        if not self.username or not self.password:
-            raise ValueError("MERRA credentials not found. Please set MERRA_USERNAME and MERRA_PASSWORD environment variables.")
         return self.username, self.password 
